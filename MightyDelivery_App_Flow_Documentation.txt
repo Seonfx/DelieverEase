@@ -1,0 +1,164 @@
+# **MightyDelivery - Application Flow & Feature Breakdown**
+
+## 1. Introduction
+
+This document provides a comprehensive breakdown of the MightyDelivery Flutter application. The goal is to outline all features, user flows, and backend functionalities to support the re-creation of this system as a web application. The system is a feature-rich, on-demand local delivery platform connecting customers, delivery drivers, and administrators.
+
+## 2. User Roles
+
+The application is built around three distinct user roles:
+
+*   **Customer**: The end-user who creates and pays for delivery orders.
+*   **Driver (Delivery Man)**: The user who accepts and executes the deliveries.
+*   **Admin**: The system administrator who manages the entire platform via a web-based backend panel.
+
+---
+
+## 3. Customer App Flow
+
+This section details the entire journey for a **Customer**.
+
+### 3.1. Onboarding & Authentication
+
+*   **First-Time User**:
+    1.  The user is greeted with a **Splash Screen**.
+    2.  An interactive **Walkthrough Screen** introduces the app's features.
+    3.  The user is directed to the **Login Screen**.
+*   **Authentication Options**:
+    *   Users can **Register** with an email and password.
+    *   Users can **Login** using their credentials or via social logins (**Google** & **Apple**).
+    *   A **Forgot Password** flow is available for account recovery.
+*   **Verification**: New users must complete **Email Verification** and **OTP (Phone) Verification**.
+*   **Initial Setup**: Before accessing the dashboard, the user must select their **City**.
+
+### 3.2. Main Dashboard
+
+The `DashboardScreen` is the central hub with two main tabs:
+
+*   **Orders Tab**: The default view, showing a list of active and past orders.
+*   **Account Tab**: Access to all account-related settings.
+*   **Primary Action**: A Floating Action Button allows users to initiate the order creation process.
+
+### 3.3. Creating a Delivery Order (Multi-Step Wizard)
+
+*   **Step 1: Order Details**: Select Parcel Type, Weight, Quantity, Vehicle Type, and opt-in for **Package Insurance** or the **Bidding System**.
+*   **Step 2: Pickup Information**: Set the pickup address (from map or saved addresses), sender's details, and pickup time.
+*   **Step 3: Delivery Information**: Set the delivery address and recipient's details.
+*   **Step 4: Review Route**: A map displays the route and total distance.
+*   **Step 5: Review & Payment**: Shows an order summary, an itemized cost breakdown, and allows applying a **Discount Coupon**.
+
+### 3.4. Payment
+
+*   The user selects a payment method: **Cash**, **Wallet**, or **Online Payment**.
+*   The `PaymentScreen` handles secure transactions through multiple gateways (**Stripe, Razorpay, PayPal,** etc.), which are configured by the Admin.
+
+### 3.5. Order Tracking & History
+
+*   From the dashboard, users can select an active order to view its details.
+*   The `OrderTrackingScreen` provides a **Live Map** with the driver's real-time location, updated every few seconds, with the route drawn on the map.
+*   The `OrderHistoryScreen` provides a list of all completed orders.
+
+### 3.6. Account Management
+
+The account section provides access to: Profile, Address Book, Wallet, Refer & Earn program, Claims, and Settings (Language, Theme).
+
+---
+
+## 4. Driver App Flow
+
+This section details the workflow for a **Delivery Driver**.
+
+### 4.1. Onboarding & Verification
+
+*   Drivers are registered by an **Admin**.
+*   Before starting, a new driver must submit documents (e.g., driver's license, vehicle registration) through the `VerifyDeliveryPersonScreen`. An admin must approve these documents.
+*   The driver must also register their vehicle details.
+
+### 4.2. Main Dashboard (`DHomeFragment`)
+
+The driver's dashboard is a grid of key performance metrics:
+*   **Order Counts**: Today, Pending, In-Progress, Completed.
+*   **Earnings Summary**: Total Earnings, Wallet Balance.
+*   **Withdrawal Status**: Pending & Completed.
+*   Each metric is a tappable card that navigates to a detailed, filtered list or screen.
+
+### 4.3. Acquiring Orders
+
+Drivers acquire jobs in two ways:
+
+*   **Direct Assignment**: An admin assigns an order directly to a driver, who is alerted via push notification and an in-app **ringtone**.
+*   **Bidding**: A real-time bidding system notifies drivers of new jobs via a prominent banner on their dashboard.
+
+### 4.4. Executing a Delivery (Status-Driven)
+
+*   **Navigation**: The `TrackingScreen` provides map-based navigation to the pickup/delivery location. The app continuously tracks the driver's location in the background.
+*   **Proof of Action**: At both pickup and delivery, the driver uses a dedicated screen (`ReceivedScreenOrderScreen`) to capture proof:
+    1.  **OTP Verification** with the customer/recipient.
+    2.  **Digital Signature** capture on the device.
+    3.  **Photo Evidence** of the package.
+    4.  **Cash Collection** for non-prepaid orders.
+*   This securely documents each step, updating the order status and uploading the proof to the backend.
+
+### 4.5. Earnings & Profile Management
+
+*   **Earnings**: View detailed earnings history and current wallet balance.
+*   **Withdrawals**: Request to withdraw earnings to a registered bank account. This request must be approved by an Admin.
+*   **Profile**: Manage personal information, vehicles, and bank details.
+
+---
+
+## 5. Bidding System Flow
+
+This is a core feature enabling market-based pricing.
+
+1.  **Customer**: Creates an order and enables the **"Enable Bidding"** option.
+2.  **Driver**: Is notified of a new biddable order on their dashboard. They navigate to the `DeliveryBidListScreen` to see available jobs.
+3.  **Driver**: Selects a job, reviews the details, and submits their price (bid) on the `OrderDetailsWithBidScreen`.
+4.  **Customer**: Navigates to the `BidListScreen` for their order to see a list of drivers who have bid, along with their prices and ratings.
+5.  **Customer**: **Accepts** the preferred bid.
+6.  **System**: The order is automatically assigned to the winning driver, and the standard delivery execution flow begins.
+
+---
+
+## 6. Admin Panel Features (Inferred)
+
+The backend is managed via a comprehensive web-based Admin Panel with the following features:
+
+*   **Dashboard**: An analytics overview of the entire system (revenue, orders, users).
+*   **Order Management**: View all orders, filter them, track them on a map, and manually assign them to drivers.
+*   **User & Driver Management**: Full CRUD management of all users and drivers. Includes a workflow for reviewing and verifying new driver applications and documents.
+*   **Financial Management**: Approve/reject driver withdrawal requests, manage discount coupons, set commission rates, and view all platform transactions.
+*   **System Configuration**: A master settings panel to manage:
+    *   Countries and Cities where the service operates.
+    *   Vehicle and Parcel types.
+    *   Delivery pricing rules (base fare, per-distance charge, etc.).
+    *   Payment gateways and their API keys.
+    *   Feature flags for Bidding, Insurance, etc.
+*   **Support Management**: A ticketing system to manage customer support requests and user-filed claims.
+*   **Content Management**: The ability to edit static app pages (e.g., About Us, Privacy Policy).
+
+## 7. Core Technology & Key Features
+
+*   **Framework**: Flutter
+*   **Backend**: Firebase (Authentication, Firestore/Real-time Database, Storage, Crashlytics).
+*   **State Management**: MobX.
+*   **Mapping**: Google Maps API (for live tracking, routing, and place selection).
+*   **Push Notifications**: OneSignal.
+*   **Payment Integrations**: Stripe, Razorpay, PayPal, Paystack, and more.
+*   **Key Architectural Features**:
+    *   Real-time location tracking.
+    *   Multi-language support.
+    *   Light & Dark theme modes.
+    *   In-app chat and customer support (Crisp Chat).
+    *   OTP verification and signature capture for security.
+    *   Remotely configurable features and settings.
+
+## 8. Data Models Overview
+
+The system is built on a set of comprehensive data models, including:
+*   `OrderData`: The central entity containing all information about a delivery.
+*   `UserData`: A unified model for both Customers and Drivers, differentiated by a `user_type` field.
+*   `AppSetting`: A crucial model holding all admin-configurable settings.
+*   `City`, `Country`: For geographical management.
+*   `Vehicle`, `ParcelType`: For defining delivery options.
+*   `PaymentGateway`, `Coupon`, `WithdrawRequest`: For managing financial aspects. 
